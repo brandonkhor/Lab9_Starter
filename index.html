@@ -47,6 +47,14 @@
       width: 122px;
     }
   </style>
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+  <script>
+    window.TrackJS && TrackJS.install({ 
+      token: "9fdbcaa4736b4a27ab5e93f68df04e60"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+  </script>
+  
 </head>
 
 <body>
@@ -86,20 +94,161 @@
       <button>Trigger a Global Error</button>
     </section>
   </main>
-
+  
   <script>
+
+    class CalculatorInputError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = "CalculatorInputError";
+      }
+    }
+
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
-      let output = document.querySelector('output');
-      let firstNum = document.querySelector('#first-num').value;
-      let secondNum = document.querySelector('#second-num').value;
-      let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      const output = document.querySelector('output');
+      const firstNum = document.querySelector('#first-num').value;
+      const secondNum = document.querySelector('#second-num').value;
+      const operator = document.querySelector('#operator').value;
+
+      try {
+        if (firstNum === "" || secondNum === "") {
+          throw new CalculatorInputError("Both numbers are required.");
+        }
+
+        const a = parseFloat(firstNum);
+        const b = parseFloat(secondNum);
+
+        if (isNaN(a) || isNaN(b)) {
+          throw new CalculatorInputError("Inputs must be valid numbers.");
+        }
+
+        if (operator === "/" && b === 0) {
+          throw new CalculatorInputError("Division by zero is not allowed.");
+        }
+
+        const result = eval(`${a} ${operator} ${b}`);
+        output.innerHTML = result;
+      } catch (err) {
+        if (err instanceof CalculatorInputError) {
+          console.warn("Input error:", err.message);
+        } else {
+          console.error("Unexpected error:", err);
+        }
+        output.innerHTML = err.message;
+      } finally {
+        console.log("Calculator attempted operation.");
+      }
     });
 
-    let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
+    let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
+    
+    const [
+      logBtn,
+      errorBtn,
+      countBtn,
+      warnBtn,
+      assertBtn,
+      clearBtn,
+      dirBtn,
+      dirxmlBtn,
+      groupStartBtn,
+      groupEndBtn,
+      tableBtn,
+      timeStartBtn,
+      timeEndBtn,
+      traceBtn,
+      globalErrorBtn
+    ] = errorBtns;
+
+    logBtn.addEventListener("click", () => {
+      console.log("Console Log Demo");
+    });
+    errorBtn.addEventListener("click", () => {
+      console.error("Console Error Demo");
+    });
+    countBtn.addEventListener("click", () => {
+      console.count("Clicked Count");
+    });
+    warnBtn.addEventListener("click", () => {
+      console.warn("Console Warn Button");
+    });
+    assertBtn.addEventListener("click", () => {
+      let number = 2;
+      console.assert(2 == 3, "Number does not equal 3");
+    });
+    clearBtn.addEventListener("click", () => {
+      console.clear();
+    });
+    dirBtn.addEventListener("click", () => {
+      const button = document.createElement("button");
+      button.textContent = "Console dirxml";
+      console.dir(button);
+    });
+
+    dirxmlBtn.addEventListener("click", () => {
+      const button = document.createElement("button");
+      button.textContent = "Console dirxml";
+      console.dirxml(button);
+    });
+    groupStartBtn.addEventListener("click", () => {
+      console.group("console.group");
+    });
+
+    groupEndBtn.addEventListener("click", () => {
+      console.groupEnd();
+    });
+    tableBtn.addEventListener("click", () => {
+      const courses = [
+        { name: "Software Engineering", num: 110 },
+        { name: "Programming Languages", num: 130 },
+        { name: "Advanced Software Engineering", num: 112 }
+      ];
+      console.table(courses);
+    });
+    timeStartBtn.addEventListener("click", () => {
+      console.time("Time Button");
+    });
+
+    timeEndBtn.addEventListener("click", () => {
+      console.timeEnd("Time Button");
+    });
+    traceBtn.addEventListener("click", () => {
+      function deepest() {
+        console.trace("console.trace");
+      }
+
+      function deeper() {
+        deepest();
+      }
+
+      function deep() {
+        deeper();
+      }
+
+      deep();
+    });
+
+    window.onerror = function(message, source, lineno, colno, error) {
+      console.log("Error caught");
+      console.log("Message:", message);
+      console.log("Source:", source);
+      console.log("Line:", lineno, "Column:", colno);
+      console.log("Error object:", error);
+      return false;
+    };
+    function handleBtnClick() {
+      boom;
+    }
+
+    globalErrorBtn.addEventListener("click", handleBtnClick);
+
+
+
+
+    
     // Start your code here
     // You may move this JS to another file if you wish
   </script>
